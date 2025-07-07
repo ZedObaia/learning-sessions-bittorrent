@@ -262,6 +262,12 @@ class TorrentFile:
         port = int.from_bytes(peer_bytes[4:6], "big")
         return Peer(ip, port)
 
+    def _split_peers_bytes(self, peers_bytes: bytes) -> list[bytes]:
+        """
+        Split the peers bytes into 6 bytes chunks.
+        """
+        return [peers_bytes[i : i + 6] for i in range(0, len(peers_bytes), 6)]
+
     def get_tracker_response(self) -> TrackerResponse:
         """
         Get the list of peers from the torrent file.
@@ -277,11 +283,8 @@ class TorrentFile:
 
         resp = decode_bencode(response.content)
 
-        # split them into 6 bytes chunks
-        peers = [
-            self._parse_peer(resp["peers"][i : i + 6])
-            for i in range(0, len(resp["peers"]), 6)
-        ]
+        peers_bytes = self._split_peers_bytes(resp["peers"])
+        peers = [self._parse_peer(peer) for peer in peers_bytes]
 
         return TrackerResponse(
             peers=peers,
