@@ -227,7 +227,10 @@ class TorrentFile:
             # First piece hash: a1b2c3d4e5f6789012345678901234567890abcd
         """
         # TODO: Implement this
-        return []
+        return [
+            self.info["pieces"][i : i + 20].hex()
+            for i in range(0, len(self.info["pieces"]), 20)
+        ]
 
     def _make_tracker_params(self) -> TrackingParams:
         """
@@ -254,7 +257,10 @@ class TorrentFile:
             int.from_bytes(byte_array, byteorder="big", signed=False)
         """
         # TODO: Implement this
-        return Peer("", 0)
+        ip_parts = [int.from_bytes(peer_bytes[i : i + 1], "big") for i in range(4)]
+        ip = ".".join(str(part) for part in ip_parts)
+        port = int.from_bytes(peer_bytes[4:6], "big")
+        return Peer(ip, port)
 
     def get_tracker_response(self) -> TrackerResponse:
         """
