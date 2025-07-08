@@ -196,6 +196,13 @@ class TorrentFile:
         return self.info["piece length"]
 
     @property
+    def total_length(self) -> int:
+        """
+        Get the total length of the torrent in bytes.
+        """
+        return self.info["length"]
+
+    @property
     def pieces(self) -> list[str]:
         """
         Get the list of SHA1 hashes for all pieces in the torrent.
@@ -227,14 +234,38 @@ class TorrentFile:
             # First piece hash: a1b2c3d4e5f6789012345678901234567890abcd
         """
         # TODO: Implement this
-        return [
-            self.info["pieces"][i : i + 20].hex()
-            for i in range(0, len(self.info["pieces"]), 20)
-        ]
+        # 1. Get the pieces from the info dictionary
+        # 2. Split the pieces into 20 bytes chunks
+        # 3. Convert each chunk to a hexadecimal string
+        # 4. Return the list of hexadecimal strings
+        raise NotImplementedError("pieces not implemented")
 
     def _make_tracker_params(self) -> TrackingParams:
         """
         Make the tracker parameters.
+
+        You'll need to make a request to the tracker URL you extracted in the previous stage, and include these query params:
+
+        info_hash: the info hash of the torrent
+            - 20 bytes long, will need to be URL encoded
+            - Note: this is NOT the hexadecimal representation, which is 40 bytes long (you can use the info_hash_bytes property to get the info hash as bytes)
+        peer_id: a unique identifier for your client
+            - A string of length 20 that you get to pick.
+        port: the port your client is listening on
+            - You can set this to 6881, you will not have to support this functionality during this challenge.
+        uploaded: the total amount uploaded so far
+            - Since your client hasn't uploaded anything yet, you can set this to 0.
+        downloaded: the total amount downloaded so far
+            - Since your client hasn't downloaded anything yet, you can set this to 0.
+        left: the number of bytes left to download
+            - Since you client hasn't downloaded anything yet, this'll be the total length of the file (use the total_length property)
+        compact: whether the peer list should use the compact representation
+            - For the purposes of this challenge, set this to 1.
+            - The compact representation is more commonly used in the wild, the non-compact representation is mostly supported for backward-compatibility.
+            - Reference: https://www.bittorrent.org/beps/bep_0023.html
+
+        Read the BitTorrent Protocol Specification for more information about these query parameters.
+        Reference: https://www.bittorrent.org/beps/bep_0003.html#trackers
         """
         return TrackingParams(
             info_hash=self.info_hash_bytes,
@@ -242,7 +273,7 @@ class TorrentFile:
             port=6881,
             uploaded=0,
             downloaded=0,
-            left=self.info["length"],
+            left=self.total_length,
         )
 
     def _parse_peer(self, peer_bytes: bytes) -> Peer:
@@ -257,10 +288,7 @@ class TorrentFile:
             int.from_bytes(byte_array, byteorder="big", signed=False)
         """
         # TODO: Implement this
-        ip_parts = [int.from_bytes(peer_bytes[i : i + 1], "big") for i in range(4)]
-        ip = ".".join(str(part) for part in ip_parts)
-        port = int.from_bytes(peer_bytes[4:6], "big")
-        return Peer(ip, port)
+        raise NotImplementedError("parse_peer not implemented")
 
     def _split_peers_bytes(self, peers_bytes: bytes) -> list[bytes]:
         """
@@ -281,12 +309,9 @@ class TorrentFile:
         if response.status_code != 200:
             raise ValueError(f"Tracker returned status code {response.status_code}")
 
-        resp = decode_bencode(response.content)
-
-        peers_bytes = self._split_peers_bytes(resp["peers"])
-        peers = [self._parse_peer(peer) for peer in peers_bytes]
-
-        return TrackerResponse(
-            peers=peers,
-            interval=resp["interval"],
-        )
+        # TODO: Implement this
+        # 1. Decode the response (it's bencoded dictionary)
+        # 2. Split the peers bytes into 6 bytes chunks
+        # 3. Parse each peer
+        # 4. Return the peers and interval
+        raise NotImplementedError("get_tracker_response not implemented")

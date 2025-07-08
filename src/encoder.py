@@ -1,25 +1,29 @@
 def encode_int(value: int) -> bytes:
-    return f"i{value}e".encode()
+    # TODO: Implement me
+    raise NotImplementedError("encode_int not implemented")
 
 
 def encode_bytes(value: bytes) -> bytes:
-    return f"{len(value)}:".encode() + value
+    # TODO: Implement me
+    # hint: just encode it as a string, but do no need to convert the actual bytes, since it's already bytes!
+    raise NotImplementedError("encode_bytes not implemented")
 
 
 def encode_dict(value: dict) -> bytes:
-    return (
-        b"d"
-        + b"".join(bencode_encode(k) + bencode_encode(v) for k, v in value.items())
-        + b"e"
-    )
+    # TODO: Implement me
+    # Hint: recursively call bencode_encode on each value
+    raise NotImplementedError("encode_dict not implemented")
 
 
 def encode_list(value: list) -> bytes:
-    return b"l" + b"".join(bencode_encode(v) for v in value) + b"e"
+    # TODO: Implement me
+    # Hint: recursively call bencode_encode on each value
+    raise NotImplementedError("encode_list not implemented")
 
 
 def encode_str(value: str) -> bytes:
-    return f"{len(value)}:{value}".encode()
+    # TODO: Implement me
+    raise NotImplementedError("encode_str not implemented")
 
 
 def bencode_encode(value: dict | list | str | int | bytes) -> bytes:
